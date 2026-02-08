@@ -24,6 +24,13 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
+    double parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
     return OrderItem(
       id: json['id'] as int? ?? 0,
       orderId: json['order_id'] as int? ?? 0,
@@ -31,7 +38,7 @@ class OrderItem {
       productName: json['product']?['name'] as String? ??
           json['product_name'] as String? ??
           'Unknown Product',
-      productPrice: (json['product_price'] as num?)?.toDouble() ?? 0.0,
+      productPrice: parseDouble(json['product_price'] ?? json['unit_price'] ?? json['price'] ?? json['amount']),
       quantity: json['quantity'] as int? ?? 1,
       notes: json['notes'] as String?,
       selectedOptions: json['selected_options'] is List

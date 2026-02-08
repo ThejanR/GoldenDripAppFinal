@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
+import '../utils/auth_error_handler.dart';
 
 class RegisterScreen extends StatefulWidget {
   final VoidCallback onRegisterSuccess;
@@ -68,10 +69,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Navigator.pop(context);
         }
       } catch (e) {
-        // Handle API errors
+        // Handle API errors with user-friendly messages
         if (mounted) {
+          final errorMessage =
+              AuthErrorHandler.getFriendlyErrorMessage(e as Exception);
+          final isError = AuthErrorHandler.isCredentialError(e as Exception);
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Registration failed: ${e.toString()}')),
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: isError ? Colors.red : Colors.orange,
+              duration: const Duration(seconds: 4),
+            ),
           );
         }
       } finally {

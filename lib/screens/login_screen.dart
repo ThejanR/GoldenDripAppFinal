@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
+import '../utils/auth_error_handler.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onLoginSuccess;
@@ -56,10 +57,18 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
-        // Handle API errors
+        // Handle API errors with user-friendly messages
         if (mounted) {
+          final errorMessage =
+              AuthErrorHandler.getFriendlyErrorMessage(e as Exception);
+          final isError = AuthErrorHandler.isCredentialError(e as Exception);
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login failed: ${e.toString()}')),
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: isError ? Colors.red : Colors.orange,
+              duration: const Duration(seconds: 4),
+            ),
           );
         }
       } finally {

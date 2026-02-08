@@ -5,6 +5,8 @@ import 'screens/main_screen.dart';
 import 'providers/cart_provider.dart';
 import 'providers/temperature_provider.dart';
 import 'providers/profile_provider.dart';
+import 'providers/location_provider.dart';
+import 'providers/theme_provider.dart';
 import 'utils/theme.dart';
 import 'services/api_service.dart';
 
@@ -27,14 +29,22 @@ class GoldenDripApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => CartProvider()),
         ChangeNotifierProvider(create: (context) => TemperatureProvider()),
         ChangeNotifierProvider(create: (context) => ProfileProvider()),
+        ChangeNotifierProvider(create: (context) => LocationProvider()),
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (context) => ThemeProvider()..initialize(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'Golden Drip Coffee',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        home: const SplashScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Golden Drip Coffee',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }

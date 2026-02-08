@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 class ApiService {
   // TODO: Update with your Laravel API base URL
-  static const String _baseUrl = 'http://10.0.2.2:8000/api';
+  static const String _baseUrl = 'http://13.48.42.101/api';
 
   static const String _authTokenKey = 'auth_token';
   static String? _authToken;

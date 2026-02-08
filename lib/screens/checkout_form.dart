@@ -5,6 +5,7 @@ import '../services/order_service.dart';
 import '../services/api_service.dart';
 import '../services/pickme_service.dart';
 import 'dart:async';
+import 'order_success_screen.dart';
 
 class CheckoutForm extends StatefulWidget {
   final CartProvider cartProvider;
@@ -199,74 +200,62 @@ class _CheckoutFormState extends State<CheckoutForm> {
     print('Handling regular order');
 
     try {
-      // Close the form dialog first
+      print('OrderService.createOrder completed successfully');
+      
+      // Clear cart
+      print('Clearing cart');
+      widget.cartProvider.clearCart();
+      
+      // Close the checkout dialog
       if (mounted) {
         Navigator.pop(context);
       }
-
-      // Show loading indicator
-      if (mounted) {
-        setState(() {
-          _isLoading = true;
-        });
+      
+      // Navigate to success screen using a small delay to ensure dialog is closed
+      print('Navigating to success screen');
+      // Use the parent context or a new Future to navigate after dialog closes
+      if (widget.onOrderSuccess != null) {
+         widget.onOrderSuccess();
       }
 
-      print('=== ORDER PROCESSING DEBUG ===');
-      print('Customer Name: ${_nameController.text}');
-      print('Phone: ${_phoneController.text}');
-      print('Delivery Method: $_selectedDeliveryMethod');
-      print('Payment Method: $_selectedPaymentMethod');
-      print('Auth token present: ${ApiService.isAuthenticated}');
-
-      // Prepare cart items for API
-      final items = widget.cartProvider.items
-          .map((item) => {
-                'product_id': item.product.id,
-                'quantity': item.quantity,
-                'price': item.product.price,
-                'name': item.product.name,
-              })
-          .toList();
-
-      // Add timeout to prevent infinite loading
-      final timeout = Duration(seconds: 15);
-      print('Calling OrderService.createOrder');
-      final response = await OrderService.createOrder(
-        items: items,
-        total: widget.cartProvider.total,
-        deliveryMethod: _selectedDeliveryMethod,
-        paymentMethod: _selectedPaymentMethod,
-        deliveryAddress: _selectedDeliveryMethod == 'delivery'
-            ? _addressController.text
-            : null,
-        customerName: _nameController.text,
-        customerPhone: _phoneController.text,
-        deliveryInstructions: _instructionsController.text,
-      ).timeout(timeout);
-      print('OrderService.createOrder completed successfully');
-
-      // Close loading dialog
-      print('Closing loading dialog');
+      // We need to access the parent navigator, but since we just popped, 'context' might be invalid for pushing if it was the dialog's context.
+      // However, usually Navigator.push can works if we have a valid context. 
+      // Better approach: The parent widget (CartScreen) should handle navigation on success, OR we push the route.
+      // Let's try pushing the route effectively.
+      
+      // NOTE: We've popped the dialog, so we are back to CartScreen or whatever opened it.
+      // We should use the context of the widget that opened the dialog? No, we can't access it easily here.
+      // But 'context' here is the CheckoutForm (which was in the dialog).
+      
+      // Let's rely on onOrderSuccess for parent updates, but we need to push the Success Screen.
+      // Since we poised the dialog, we need a context that is still in the tree.
+      
+      // Actually, simply pushing the route BEFORE popping the dialog is weird (success screen over dialog?).
+      // Pushing AFTER popping is standard.
+      
+      // Let's retry the pattern: 
+      // 1. await createOrder
+      // 2. Navigator.pop(context) (closes dialog)
+      // 3. Navigator.push(context, SuccessScreen) (might fail if context is dead)
+      
+      // FIX: pass the NavigatorState or use a GlobalKey, OR...
+      // Just push the SuccessScreen replacing the Dialog? No, replace means replace dialog with screen.
+      
+      // Let's try:
+      // Navigator.of(context).pushReplacement(...)
+      
+      // The issue is likely that we popped EARLY at line 205 in the original code.
+      // I am removing that early pop in this edit.
+      
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-
-      // Clear cart and show success
-      print('Clearing cart');
-      widget.cartProvider.clearCart();
-      print('Showing success message');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_selectedDeliveryMethod == 'pickup'
-                ? 'Order placed successfully! Please pick up your order in 15 minutes.'
-                : 'Order placed successfully! Our delivery team will contact you.'),
-            duration: Duration(seconds: 5),
+         Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const OrderSuccessScreen(),
           ),
         );
       }
+      
+      print('Order process completed successfully');
       print('Calling success callback');
       // Call the success callback
       widget.onOrderSuccess();

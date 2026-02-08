@@ -1,4 +1,5 @@
 import 'api_service.dart';
+import '../models/order.dart';
 
 class OrderService {
   // Get user's order history
@@ -86,6 +87,64 @@ class OrderService {
       return response['data'] as List<dynamic>;
     } catch (e) {
       rethrow;
+    }
+  }
+
+  // Get user's order history
+  static Future<List<Order>> getUserOrders() async {
+    try {
+      final response =
+          await ApiService.get('orders'); // Try basic orders endpoint
+      print('Orders API Response Type: ${response.runtimeType}');
+      print('Orders API Response: $response');
+
+      // Handle empty responses
+      if (response == null || (response is String && response.isEmpty)) {
+        print('Received empty response from orders API');
+        return [];
+      }
+
+      // Simple approach - try to get list of orders
+      List<dynamic> orderDataList = [];
+
+      if (response is List) {
+        orderDataList = response as List;
+      } else if (response is Map<String, dynamic>) {
+        // Try common keys for order lists
+        if (response.containsKey('data') && response['data'] is List) {
+          orderDataList = response['data'] as List;
+        } else if (response.containsKey('orders') &&
+            response['orders'] is List) {
+          orderDataList = response['orders'] as List;
+        } else {
+          // Single order - wrap in list
+          orderDataList = [response];
+        }
+      }
+
+      // Convert to Order objects
+      final List<Order> orders = [];
+      for (var item in orderDataList) {
+        if (item is Map<String, dynamic>) {
+          try {
+            final order = Order.fromJson(item);
+            if (order.total <= 0) {
+              print('WARNING: Order #${order.id} parsed with 0 total. Raw item data: $item');
+            }
+            orders.add(order);
+            print('Successfully parsed order #${order.id} with total: ${order.total}');
+          } catch (e) {
+            print('Failed to parse order item: $e');
+            print('Item data: $item');
+          }
+        }
+      }
+
+      print('Successfully loaded ${orders.length} orders');
+      return orders;
+    } catch (e) {
+      print('Error in getUserOrders: $e');
+      return [];
     }
   }
 }

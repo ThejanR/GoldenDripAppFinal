@@ -34,14 +34,21 @@ class Order {
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
+    double parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? 0.0;
+      return 0.0;
+    }
+
     return Order(
       id: json['id'] as int? ?? 0,
       userId: json['user_id'] as int? ?? 0,
       status: json['status'] as String? ?? 'pending',
-      subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
-      tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
-      deliveryFee: (json['delivery_fee'] as num?)?.toDouble() ?? 0.0,
-      total: (json['total'] as num?)?.toDouble() ?? 0.0,
+      subtotal: parseDouble(json['subtotal'] ?? json['sub_total']),
+      tax: parseDouble(json['tax'] ?? json['tax_amount']),
+      deliveryFee: parseDouble(json['delivery_fee'] ?? json['shipping_fee']),
+      total: parseDouble(json['total'] ?? json['total_amount'] ?? json['grand_total'] ?? json['amount']),
       deliveryAddress: json['delivery_address'] as String? ?? '',
       deliveryInstructions: json['delivery_instructions'] as String?,
       paymentMethod: json['payment_method'] as String? ?? 'cash',

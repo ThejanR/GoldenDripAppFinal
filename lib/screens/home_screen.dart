@@ -4,6 +4,7 @@ import '../models/product.dart';
 import '../providers/temperature_provider.dart';
 import '../providers/profile_provider.dart';
 import '../services/product_service.dart';
+import 'location_demo_screen.dart';
 import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
@@ -55,25 +56,29 @@ class _HomeScreenState extends State<HomeScreen> {
         _recommendedProducts = recommendedProducts;
         _isLoading = false;
       });
-      
+
       // Debug logging
       print('Loaded ${popularProducts.length} popular products');
       for (var product in popularProducts) {
-        print('Popular product: ${product.name}, isPopular: ${product.isPopular}');
+        print(
+            'Popular product: ${product.name}, isPopular: ${product.isPopular}');
       }
-      
+
       // Fallback: if no popular products, show featured products as popular
       if (popularProducts.isEmpty) {
         print('No popular products found, using featured products as fallback');
-        final featuredProducts = allProducts.where((p) => p.isFeatured).toList();
+        final featuredProducts =
+            allProducts.where((p) => p.isFeatured).toList();
         if (featuredProducts.isNotEmpty) {
-          print('Using ${featuredProducts.length} featured products as popular');
+          print(
+              'Using ${featuredProducts.length} featured products as popular');
           setState(() {
             _popularProducts = featuredProducts;
           });
         } else {
           // Last resort: show first 3 products as popular
-          print('No featured products found, using first 3 products as popular');
+          print(
+              'No featured products found, using first 3 products as popular');
           final firstProducts = allProducts.take(3).toList();
           setState(() {
             _popularProducts = firstProducts;
@@ -171,11 +176,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         : null,
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    'Welcome Back, ${profileProvider.user?.name?.split(' ').first ?? 'Guest'}!',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                  Expanded(
+                    child: Text(
+                      'Welcome Back, ${profileProvider.user?.name?.split(' ').first ?? 'Guest'}!',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
                   ),
                 ],
               ),
@@ -568,8 +575,9 @@ class ProductListTile extends StatelessWidget {
   }
 
   Widget _buildProductImage(BuildContext context, Product product) {
-    print('Building image for product: ${product.name}, image path: ${product.image}, asset path: ${product.imageAsset}');
-    
+    print(
+        'Building image for product: ${product.name}, image path: ${product.image}, asset path: ${product.imageAsset}');
+
     // First try to load the network image
     if (product.image.startsWith('http')) {
       print('Loading image from network: ${product.image}');
@@ -582,7 +590,8 @@ class ProductListTile extends StatelessWidget {
             alignment: Alignment.center,
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
                   : null,
             ),
           );
@@ -667,5 +676,4 @@ class ProductListTile extends StatelessWidget {
       }
     }
   }
-
 }

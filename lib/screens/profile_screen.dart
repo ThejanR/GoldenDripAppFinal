@@ -2,8 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/profile_provider.dart';
+import '../providers/theme_provider.dart';
 import 'temperature_debug_screen.dart';
+import 'order_history_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback onLogout;
@@ -258,10 +261,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       context,
                       items: [
                         _ProfileMenuItem(
-                          icon: Icons.notifications,
-                          title: 'Notifications',
-                          subtitle: 'Manage notification preferences',
-                          onTap: () {},
+                          icon: Icons.history,
+                          title: 'Order History',
+                          subtitle: 'View your past orders',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const OrderHistoryScreen(),
+                              ),
+                            );
+                          },
                         ),
                         _ProfileMenuItem(
                           icon: Icons.language,
@@ -272,8 +283,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _ProfileMenuItem(
                           icon: Icons.dark_mode,
                           title: 'Theme',
-                          subtitle: 'System default',
-                          onTap: () {},
+                          subtitle: 'Click light/dark mode',
+                          onTap: () {
+                            final themeProvider = Provider.of<ThemeProvider>(
+                                context,
+                                listen: false);
+                            themeProvider.toggleTheme();
+                          },
                         ),
                         _ProfileMenuItem(
                           icon: Icons.thermostat,
